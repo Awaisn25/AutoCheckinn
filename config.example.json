@@ -1,0 +1,70 @@
+{
+  "_instructions": "Copy this file to config.json and fill in your values. Never commit config.json to git.",
+
+  "subdomain": "yourcompany",
+
+  "urls": {
+    "login": "https://yourcompany.resourceinn.com/api/v1/oauth/webLogin",
+    "attendance": "https://yourcompany.resourceinn.com/api/v1/directives/markAttendance"
+  },
+
+  "headers": {
+    "version-code": "417",
+    "version-no": "4.1.7"
+  },
+
+  "shift": {
+    "_comment": "Capture this by intercepting a real check-in request from your browser's DevTools Network tab and copying the 'shift' object from the request payload.",
+    "id": 0,
+    "created_at": "",
+    "updated_at": "",
+    "deleted_at": null,
+    "employment_id": "",
+    "company_id": 0,
+    "time_slot_id": 0,
+    "date": "",
+    "bg_colour": "#a4a4a4",
+    "font_colour": "#000000",
+    "over_time_hours": 0,
+    "start_datetime": "",
+    "end_datetime": "",
+    "department_hierarchy_code": "",
+    "is_default": true,
+    "expected_minutes": 540,
+    "is_full_overtime_shift": false,
+    "geo_fence_ids": null,
+    "identifier": "",
+    "is_work_from_home": false,
+    "is_optional": false,
+    "shift_tags": [],
+    "time_slot": {
+      "id": 0,
+      "code": "",
+      "day_changed": false,
+      "start_buffer_minutes": 30,
+      "end_buffer_minutes": 15,
+      "punch_end_buffer_minutes": 120,
+      "is_overtime_applicable": false,
+      "is_active": true,
+      "created_at": "",
+      "updated_at": "",
+      "deleted_at": null,
+      "company_id": 0,
+      "name": "",
+      "duration_minutes": 540,
+      "start": "",
+      "end": "",
+      "is_flexible": false,
+      "flexible_minutes": 0,
+      "bg_colour": "#a4a4a4",
+      "font_colour": "#000000",
+      "is_full_overtime_slot": false,
+      "is_night": false,
+      "punch_start_buffer_minutes": 60,
+      "flexible_hours": 0,
+      "identifier": "",
+      "status": "Active",
+      "status_class": "bg-success"
+    }
+  }
+}

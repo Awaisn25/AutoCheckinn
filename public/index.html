@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ResourceInn Auto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --border: #2a2a40;
+    --accent: #6c63ff;
+    --accent-dim: rgba(108, 99, 255, 0.15);
+    --green: #23d18b;
+    --green-dim: rgba(35, 209, 139, 0.12);
+    --red: #ff5c5c;
+    --red-dim: rgba(255, 92, 92, 0.12);
+    --amber: #f5a623;
+    --amber-dim: rgba(245, 166, 35, 0.12);
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 40px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    padding: 28px 20px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(108, 99, 255, 0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 0%, #a8a0ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Pulse dot */
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-dim);
+    border: 1px solid rgba(35, 209, 139, 0.3);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--green);
+    margin-top: 10px;
+  }
+  .pulse-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* Cards */
+  .section { padding: 0 16px; margin-bottom: 12px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    background: linear-gradient(135deg, rgba(108,99,255,0.05), transparent);
+  }
+  .card:hover::after { opacity: 1; }
+
+  .card-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 14px;
+  }
+
+  /* Status Grid */
+  .status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-value.accent { color: #a8a0ff; }
+
+  /* Location Ring */
+  .location-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0 4px;
+  }
+  .ring-container {
+    position: relative;
+    width: 120px; height: 120px;
+    margin-bottom: 14px;
+  }
+  .ring-svg { width: 120px; height: 120px; transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+  .ring-fill {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 314;
+    stroke-dashoffset: 314;
+    transition: stroke-dashoffset 1s ease, stroke 0.5s;
+  }
+  .ring-fill.in { stroke: var(--green); }
+  .ring-fill.close { stroke: var(--amber); }
+  .ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .ring-distance {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    line-height: 1;
+  }
+  .ring-unit { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+  .location-status-text {
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .location-status-text.in { color: var(--green); }
+  .location-status-text.out { color: var(--red); }
+  .location-status-text.unknown { color: var(--muted); }
+
+  /* Buttons */
+  .btn {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .btn:active::after { opacity: 0.08; }
+  .btn:active { transform: scale(0.98); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #6c63ff, #a855f7);
+    color: white;
+    box-shadow: 0 4px 20px rgba(108, 99, 255, 0.35);
+  }
+  .btn-green {
+    background: linear-gradient(135deg, #23d18b, #16a87a);
+    color: #001a0e;
+    box-shadow: 0 4px 20px rgba(35, 209, 139, 0.3);
+  }
+  .btn-red {
+    background: linear-gradient(135deg, #ff5c5c, #e03333);
+    color: white;
+    box-shadow: 0 4px 20px rgba(255, 92, 92, 0.3);
+  }
+  .btn-ghost {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Feature toggle */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .toggle-label { font-size: 14px; font-weight: 600; }
+  .toggle-sub { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+  .toggle {
+    width: 44px; height: 24px;
+    background: var(--border);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex-shrink: 0;
+    border: none;
+    outline: none;
+  }
+  .toggle.on { background: var(--accent); }
+  .toggle::before {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .toggle.on::before { transform: translateX(20px); }
+
+  /* Log */
+  .log-container {
+    max-height: 240px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .log-entry {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+  .log-dot.success { background: var(--green); }
+  .log-dot.error { background: var(--red); }
+  .log-dot.warn { background: var(--amber); }
+  .log-dot.info { background: var(--accent); }
+  .log-time { color: var(--muted); flex-shrink: 0; }
+  .log-msg { color: var(--text); line-height: 1.4; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+    z-index: 999;
+    min-width: 220px;
+    text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(35,209,139,0.4); color: var(--green); }
+  .toast.error { border-color: rgba(255,92,92,0.4); color: var(--red); }
+  .toast.info { border-color: rgba(108,99,255,0.4); color: #a8a0ff; }
+
+  /* Divider */
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    padding: 0 16px;
+    margin-bottom: 8px;
+    margin-top: 20px;
+  }
+
+  /* Config badge */
+  .config-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+  .config-row:last-child { border-bottom: none; }
+  .config-key { color: var(--muted); }
+  .config-val { color: var(--text); font-weight: 500; }
+
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">ResourceInn Auto</div>
+  <h1>Auto<br>Check-In</h1>
+  <div class="live-badge">
+    <span class="pulse-dot"></span>
+    <span id="live-time">--:--:--</span>
+  </div>
+</div>
+
+<!-- Status -->
+<div class="section-label">Today's Status</div>
+<div class="section">
+  <div class="card">
+    <div class="status-grid">
+      <div class="stat-block">
+        <div class="stat-label">Check-in</div>
+        <div class="stat-value green" id="stat-checkin">--:--</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Check-out</div>
+        <div class="stat-value red" id="stat-checkout">--:--</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Session</div>
+        <div class="stat-value accent" id="stat-session">Unknown</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Next Action</div>
+        <div class="stat-value amber" id="stat-next">--</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Location -->
+<div class="section-label">Location Status</div>
+<div class="section">
+  <div class="card" id="location-card">
+    <div class="card-title">GPS Perimeter Check</div>
+    <div class="location-visual">
+      <div class="ring-container">
+        <svg class="ring-svg" viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="50"/>
+          <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="50"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-distance" id="ring-dist">?</div>
+          <div class="ring-unit">meters</div>
+        </div>
+      </div>
+      <div class="location-status-text unknown" id="loc-status-text">Location not yet fetched</div>
+    </div>
+    <button class="btn btn-primary" id="btn-location" onclick="fetchLocation()" style="margin-top:14px">
+      📍 Send My Location
+    </button>
+  </div>
+</div>
+
+<!-- Manual Actions -->
+<div class="section-label">Manual Controls</div>
+<div class="section">
+  <div class="card">
+    <div class="card-title">Override / Test</div>
+    <div class="btn-row" style="margin-bottom:10px">
+      <button class="btn btn-green" onclick="manualAction('checkin')">✅ Check In</button>
+      <button class="btn btn-red" onclick="manualAction('checkout')">🚪 Check Out</button>
+    </div>
+    <button class="btn btn-ghost" onclick="manualAction('login')">🔑 Re-authenticate</button>
+  </div>
+</div>
+
+<!-- Feature Toggles -->
+<div class="section-label">Features</div>
+<div class="section">
+  <div class="card">
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Location Check</div>
+        <div class="toggle-sub">Require in-perimeter ping before check-in</div>
+      </div>
+      <button class="toggle" id="toggle-location" onclick="toggleFeature('location')"></button>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Auto Ping on Open</div>
+        <div class="toggle-sub">Send location when dashboard loads</div>
+      </div>
+      <button class="toggle on" id="toggle-autopilot" onclick="toggleFeature('autopilot')"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Config -->
+<div class="section-label">Schedule Config</div>
+<div class="section">
+  <div class="card">
+    <div class="card-title">Server Configuration</div>
+    <div class="config-row"><span class="config-key">check-in time</span><span class="config-val" id="cfg-ci">--</span></div>
+    <div class="config-row"><span class="config-key">check-out time</span><span class="config-val" id="cfg-co">--</span></div>
+    <div class="config-row"><span class="config-key">timezone</span><span class="config-val" id="cfg-tz">--</span></div>
+    <div class="config-row"><span class="config-key">office radius</span><span class="config-val" id="cfg-radius">--</span></div>
+    <div class="config-row"><span class="config-key">location required</span><span class="config-val" id="cfg-loclvl">--</span></div>
+  </div>
+</div>
+
+<!-- Activity Log -->
+<div class="section-label">Activity Log</div>
+<div class="section">
+  <div class="card">
+    <div class="card-title">Recent Events</div>
+    <div class="log-container" id="log-container">
+      <div class="log-entry">
+        <div class="log-dot info"></div>
+        <div>
+          <div class="log-time">--:--:--</div>
+          <div class="log-msg">Waiting for first status fetch...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const LOCAL_PREFS_KEY = 'ri_prefs';
+  let prefs = { locationEnabled: false, autoPingEnabled: true };
+  let officeRadius = 200;
+
+  // Load saved prefs
+  try {
+    const saved = localStorage.getItem(LOCAL_PREFS_KEY);
+    if (saved) prefs = { ...prefs, ...JSON.parse(saved) };
+  } catch(e) {}
+
+  function savePrefs() {
+    try { localStorage.setItem(LOCAL_PREFS_KEY, JSON.stringify(prefs)); } catch(e) {}
+  }
+
+  // ── Clock ──────────────────────────────────────
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('live-time').textContent = now.toLocaleTimeString();
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ── Toast ──────────────────────────────────────
+  let toastTimer;
+  function showToast(msg, type = 'info') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Toggle ─────────────────────────────────────
+  function toggleFeature(feat) {
+    if (feat === 'location') {
+      prefs.locationEnabled = !prefs.locationEnabled;
+      document.getElementById('toggle-location').className =
+        `toggle${prefs.locationEnabled ? ' on' : ''}`;
+      showToast(prefs.locationEnabled ? '📍 Location check enabled' : '🕐 Time-only mode enabled', 'info');
+    } else if (feat === 'autopilot') {
+      prefs.autoPingEnabled = !prefs.autoPingEnabled;
+      document.getElementById('toggle-autopilot').className =
+        `toggle${prefs.autoPingEnabled ? ' on' : ''}`;
+    }
+    savePrefs();
+  }
+
+  // Apply saved toggle states on load
+  document.getElementById('toggle-location').className =
+    `toggle${prefs.locationEnabled ? ' on' : ''}`;
+  document.getElementById('toggle-autopilot').className =
+    `toggle${prefs.autoPingEnabled ? ' on' : ''}`;
+
+  // ── Location ───────────────────────────────────
+  function fetchLocation() {
+    const btn = document.getElementById('btn-location');
+    btn.innerHTML = '<span class="spinner"></span>Getting GPS...';
+    btn.disabled = true;
+
+    if (!navigator.geolocation) {
+      showToast('❌ Geolocation not supported', 'error');
+      btn.innerHTML = '📍 Send My Location';
+      btn.disabled = false;
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+        btn.innerHTML = '<span class="spinner"></span>Sending to server...';
+        try {
+          const res = await fetch('/api/location-ping', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lat, lng, accuracy }),
+          });
+          const data = await res.json();
+          if (data.triggered) {
+            showToast(`✅ Check-in triggered! (${data.distance}m away)`, 'success');
+          } else {
+            showToast(`📍 Ping sent — ${data.reason || 'No action taken'}`, 'info');
+          }
+          await refreshStatus();
+        } catch(e) {
+          showToast('❌ Server error: ' + e.message, 'error');
+        }
+        btn.innerHTML = '📍 Send My Location';
+        btn.disabled = false;
+      },
+      (err) => {
+        showToast('❌ GPS error: ' + err.message, 'error');
+        btn.innerHTML = '📍 Send My Location';
+        btn.disabled = false;
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
+  // ── Manual actions ─────────────────────────────
+  async function manualAction(action) {
+    const labels = { checkin: 'Checking in...', checkout: 'Checking out...', login: 'Logging in...' };
+    showToast(`⏳ ${labels[action]}`, 'info');
+    try {
+      const res = await fetch(`/api/manual/${action}`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`✅ ${action.charAt(0).toUpperCase() + action.slice(1)} successful!`, 'success');
+      } else {
+        showToast(`⚠️ ${data.reason || 'Action failed'}`, 'error');
+      }
+      await refreshStatus();
+    } catch(e) {
+      showToast('❌ Error: ' + e.message, 'error');
+    }
+  }
+
+  // ── Status refresh ─────────────────────────────
+  function formatTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function updateRing(distance, radius) {
+    const fill = document.getElementById('ring-fill');
+    const distEl = document.getElementById('ring-dist');
+    const textEl = document.getElementById('loc-status-text');
+
+    if (distance === null) {
+      distEl.textContent = '?';
+      fill.style.strokeDashoffset = '314';
+      textEl.className = 'location-status-text unknown';
+      textEl.textContent = 'Location not yet fetched';
+      return;
+    }
+
+    const circumference = 314;
+    const ratio = Math.min(distance / radius, 1);
+    const offset = circumference * ratio;
+    fill.style.strokeDashoffset = offset;
+
+    distEl.textContent = distance >= 1000 ? (distance/1000).toFixed(1)+'k' : distance;
+    document.querySelector('.ring-unit').textContent = distance >= 1000 ? 'km' : 'meters';
+
+    const inPerimeter = distance <= radius;
+    if (inPerimeter) {
+      fill.classList.add('in');
+      fill.classList.remove('close');
+      textEl.className = 'location-status-text in';
+      textEl.textContent = `✅ Inside perimeter (${distance}m)`;
+    } else if (distance <= radius * 2) {
+      fill.classList.remove('in');
+      fill.classList.add('close');
+      textEl.className = 'location-status-text out';
+      textEl.textContent = `📍 Close but outside (${distance}m)`;
+    } else {
+      fill.classList.remove('in', 'close');
+      textEl.className = 'location-status-text out';
+      textEl.textContent = `❌ Far from office (${distance}m)`;
+    }
+  }
+
+  function renderLog(entries) {
+    const container = document.getElementById('log-container');
+    if (!entries || !entries.length) return;
+    container.innerHTML = entries.map(e => {
+      const t = new Date(e.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      return `
+        <div class="log-entry">
+          <div class="log-dot ${e.level}"></div>
+          <div>
+            <div class="log-time">${t}</div>
+            <div class="log-msg">${e.message}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function refreshStatus() {
+    try {
+      const res = await fetch('/api/status');
+      const d = await res.json();
+
+      // Today's stats
+      const todayStr = new Date().toDateString();
+      const ciToday = d.lastCheckin && new Date(d.lastCheckin).toDateString() === todayStr;
+      const coToday = d.lastCheckout && new Date(d.lastCheckout).toDateString() === todayStr;
+
+      document.getElementById('stat-checkin').textContent = ciToday ? formatTime(d.lastCheckin) : '—';
+      document.getElementById('stat-checkout').textContent = coToday ? formatTime(d.lastCheckout) : '—';
+      document.getElementById('stat-session').textContent = d.hasSession ? 'Active ✓' : 'None ✗';
+
+      // Next action
+      const now = new Date();
+      const [ciH, ciM] = (d.config.checkinTime || '09:00').split(':').map(Number);
+      const [coH, coM] = (d.config.checkoutTime || '18:00').split(':').map(Number);
+      const ciTime = new Date(); ciTime.setHours(ciH, ciM, 0, 0);
+      const coTime = new Date(); coTime.setHours(coH, coM, 0, 0);
+      let nextAction = '—';
+      if (!ciToday && now < ciTime) nextAction = `Check-in @ ${d.config.checkinTime}`;
+      else if (!coToday && now < coTime) nextAction = `Check-out @ ${d.config.checkoutTime}`;
+      else if (ciToday && coToday) nextAction = 'Done for today ✓';
+      document.getElementById('stat-next').textContent = nextAction;
+
+      // Location ring
+      officeRadius = d.config.officeRadius || 200;
+      updateRing(d.distanceToOffice, officeRadius);
+
+      // Config
+      document.getElementById('cfg-ci').textContent = d.config.checkinTime || '--';
+      document.getElementById('cfg-co').textContent = d.config.checkoutTime || '--';
+      document.getElementById('cfg-tz').textContent = d.config.timezone || '--';
+      document.getElementById('cfg-radius').textContent = (d.config.officeRadius || '--') + 'm';
+      document.getElementById('cfg-loclvl').textContent = d.config.requireLocation ? 'Yes' : 'No';
+
+      renderLog(d.log);
+    } catch(e) {
+      console.error('Status fetch failed', e);
+    }
+  }
+
+  // ── Boot ───────────────────────────────────────
+  refreshStatus();
+  setInterval(refreshStatus, 15000); // poll every 15s
+
+  // Auto-ping on load if enabled
+  if (prefs.autoPingEnabled && navigator.geolocation) {
+    setTimeout(() => fetchLocation(), 1500);
+  }
+</script>
+</body>
+</html>

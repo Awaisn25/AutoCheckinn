@@ -1,0 +1,54 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# User config (contains personal shift IDs, employment IDs, URLs)
+config.json
+
+# Personal API request samples — contain credentials, session cookies, employment IDs
+loginRequest.sh
+checkinRequest.sh
+checkoutRequest.sh
+LoginResponse.json
+checkinPayload.json
+CheckoutPayload.json
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# PM2
+.pm2/
+
+# Optional npm cache directory
+.npm
+
+# Build files
+dist/
+build/
